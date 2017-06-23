@@ -162,17 +162,18 @@ public class GameManager : MonoBehaviour {
         }
 
         // shuffle indices - take i-th element and switch it with random element with lower index
-        for (int i = shuffledIndices.Length - 1; i >= 0; i --)
+        for (int i = shuffledIndices.Length - 1; i >= shuffledIndices.Length - randomFlowersNr; i --)
         {
             int idx = rnd.Next(i + 1);
+            flowers[shuffledIndices[idx]].GetComponent<Flammable>().fire();
             shuffledIndices[idx] = shuffledIndices[i];
         }
 
         // burn first cnt flowers
-        for (int i = 0; i < randomFlowersNr; i ++)
-        {
-            flowers[shuffledIndices[i]].GetComponent<Flammable>().fire();
-        }
+        // for (int i = 0; i < randomFlowersNr; i ++)
+        // {
+        //     flowers[shuffledIndices[i]].GetComponent<Flammable>().fire();
+        // }
     }
 
     void resizeButton(int mode)
