@@ -7,7 +7,6 @@ public class Flammable : MonoBehaviour {
     public float sphereCastRadius;
     private bool spread;
     private bool burned;
-    private float startBurnTime;
 
     private GameManager gm;
 
@@ -17,16 +16,13 @@ public class Flammable : MonoBehaviour {
         
         burned = false;
         spread = false;
-        // for (int i = 0; i < gm.fireSampleNr; i++)
-        // {
-        //     Debug.Log("sddfjlsdjflsdjf");
-        //     Vector3 start = transform.position;
-        //     Vector3 end = gm.fireRays[i].normalized;
-        // }
     }
 
     // Update is called once per frame
     void FixedUpdate() {
+        if (gm.pause)
+            return;
+
         if (spread)
         {
             spread = false;
@@ -52,14 +48,18 @@ public class Flammable : MonoBehaviour {
 
         gameObject.GetComponent<Renderer>().material.color = Color.red;
         gameObject.layer = LayerMask.NameToLayer("Burned");
-        startBurnTime = Time.realtimeSinceStartup;
         spread = true;
     }
 
     public IEnumerator burn()
     {
         int avoidMask = LayerMask.NameToLayer("Terrain");
-        yield return new WaitForSeconds(0.8f);
+       
+        yield return new WaitForSeconds(gm.simulationSpeed);
+
+        // wait if game is paused
+        while (gm.pause)
+            yield return new WaitForSeconds(0.3f);
 
         for (int i = 0; i < gm.fireSampleNr; i++)
         {
@@ -67,19 +67,20 @@ public class Flammable : MonoBehaviour {
             Vector3 dir = gm.fireRays[i];
             Debug.DrawLine(start, start + dir * Vector3.Dot(dir, gm.windDirection) * gm.windSpeed, Color.red, 15, false);
 
-            RaycastHit[] hits;
-            hits = Physics.SphereCastAll(new Ray(start, dir), sphereCastRadius, Vector3.Dot(dir, gm.windDirection) * gm.windSpeed, avoidMask);
-            Debug.Log(hits.Length);
 
-            for (int hitIdx = 0; hitIdx < hits.Length; hitIdx ++)
+            RaycastHit[] hits;
+            // dot product of the spread vector and wind direction determines the length of single casted rays
+            hits = Physics.SphereCastAll(new Ray(start, dir), sphereCastRadius, Vector3.Dot(dir, gm.windDirection) * gm.windSpeed, avoidMask);
+            //Debug.Log(hits.Length);
+
+            for (int hitIdx = 0; hitIdx < hits.Length; hitIdx++)
             {
                 RaycastHit hit = hits[hitIdx];
                 if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Flammable"))
                 {
                     hit.transform.gameObject.GetComponent<Flammable>().fire();
-                    
-                }
 
+                }
             }
             burnOut();
         }

@@ -14,7 +14,6 @@ public class CameraMovement : MonoBehaviour {
 	void Update () {
         if (Input.GetMouseButtonDown(2))
         {
-            Debug.Log("hello");
             currPosition = Input.mousePosition;
             moving = true;
         }
@@ -30,9 +29,6 @@ public class CameraMovement : MonoBehaviour {
             float pitch = currPosition.y - Input.mousePosition.y;
             Debug.Log(pitch + yaw);
             transform.rotation = Quaternion.Euler(pitch * delta, -yaw * delta, 0.0f);
-            // transform.Rotate(new Vector3(pitch * delta, -yaw * delta, 0.0f));
-            // transform.Rotate(new Vector3(1.0f, 0.0f, 0.0f), pitch * delta);
-            // transform.Rotate(new Vector3(0.0f, 1.0f, 0.0f), -yaw * delta);
         }
     }   
 }
